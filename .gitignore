@@ -1,0 +1,45 @@
+# Python virtual environments
+venv/
+*.venv/
+env/
+/env/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Data and Datasets
+# WARNING: Make sure your 'data/' folder is listed here
+# if you are not using Git LFS (Large File Storage).
+data/
+*.csv
+*.json
+*.txt
+# Specifically exclude the verification pairs file
+!verification_pairs_val.txt
+
+# Trained models
+models/
+*.h5
+*.hdf5
+*.pth
+*.pt
+*.pb
+*.onnx
+
+# Environment variables
+.env
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
