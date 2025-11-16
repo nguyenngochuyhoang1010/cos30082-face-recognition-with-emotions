@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from PIL import Image
+from torchvision import transforms
 
 # --- PyQt5 Imports ---
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, QPushButton, 
