@@ -52,7 +52,7 @@ class LivenessDetector:
         ])
         
         # 5. Class names (must match training)
-        self.class_names = ['real', 'spoof'] # From ImageFolder (alphabetical)
+        self.class_names = ['spoof', 'real'] # From ImageFolder (alphabetical)
 
     def check_liveness(self, image):
         """

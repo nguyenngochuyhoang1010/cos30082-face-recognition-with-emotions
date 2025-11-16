@@ -16,11 +16,11 @@ from PyQt5.QtCore import QTimer, Qt, QSize
 
 # --- Project Module Imports ---
 # Import the detector classes we created
-from src.anti_spoofing import LivenessDetector
-from src.emotion_detection import EmotionDetector
+from anti_spoofing import LivenessDetector
+from emotion_detection import EmotionDetector
 
 # Import the model *definition* for the verifier
-from src.models import EmbeddingNet 
+from models import EmbeddingNet 
 
 # --- Constants ---
 DB_PATH = 'face_db.json'
