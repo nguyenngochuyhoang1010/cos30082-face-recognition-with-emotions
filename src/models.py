@@ -33,14 +33,24 @@ class EmbeddingNet(nn.Module):
         return x
 
 # --- Model 3: Liveness Detector (MobileNetV2) ---
-def get_liveness_model():
-    """
-    Loads a pre-trained MobileNetV2 and replaces the final
-    classifier layer for 2-class (real/spoof) task.
-    """
-    model = models.mobilenet_v2(pretrained=True)
-    num_ftrs = model.classifier[1].in_features
-    model.classifier[1] = nn.Linear(num_ftrs, 2) # 2 classes
+def get_liveness_model(model_name='resnet18'):
+    
+    if model_name == 'resnet18':
+        model = models.resnet18(pretrained=True)
+    elif model_name == 'resnet34':
+        model = models.resnet34(pretrained=True)
+    elif model_name == 'resnet50':
+        model = models.resnet50(pretrained=True)
+    else:
+        raise ValueError("Unsupported ResNet version")
+    
+    # ResNet uses 'fc' (fully connected) as the final layer
+    # MobileNetV2 used 'classifier'. This is the main difference.
+    num_ftrs = model.fc.in_features
+    
+    # Replace the final layer for 2 classes (Real vs Spoof)
+    model.fc = nn.Linear(num_ftrs, 2)
+    
     return model
 
 # --- Model 4: Emotion Detector (Custom CNN) ---

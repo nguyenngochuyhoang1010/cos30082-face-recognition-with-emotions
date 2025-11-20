@@ -15,11 +15,8 @@ from PyQt5.QtGui import QImage, QPixmap, QFont
 from PyQt5.QtCore import QTimer, Qt, QSize
 
 # --- Project Module Imports ---
-# Import the detector classes we created
 from anti_spoofing import LivenessDetector
 from emotion_detection import EmotionDetector
-
-# Import the model *definition* for the verifier
 from models import EmbeddingNet 
 
 # --- Constants ---
@@ -29,7 +26,6 @@ HAAR_CASCADE_PATH = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml
 
 
 # --- Face Verifier Class ---
-# We create a new class for the face verifier, just like the other modules.
 class FaceVerifier:
     def __init__(self, model_path="models/metric_learning_model.pth"):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -48,7 +44,7 @@ class FaceVerifier:
         self.model.to(self.device)
         self.model.eval()
         
-        # 3. Define the image transformation (must match metric learning)
+        # 3. Define the image transformation (must match training)
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
@@ -80,7 +76,9 @@ class MainWindow(QMainWindow):
         self.mode = "idle"  # "idle", "register", "verify"
         self.register_name = ""
         self.face_db = self.load_database()
-        self.force_spoof = False # For demo purposes
+        
+        # --- Demo Mode Flag ---
+        self.force_spoof = False
 
         # --- Load All Models ---
         print("Loading models...")
@@ -163,18 +161,18 @@ class MainWindow(QMainWindow):
     def start_verification(self):
         self.mode = "verify"
         self.status_label.setText("Verifying... Look at the camera...")
-    
-    # --- DEMO MODE KEYS ---
+
+    # --- KEYBOARD EVENTS FOR DEMO MODE ---
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_S:
             self.force_spoof = True
-            print("Demo Mode: Forcing SPOOF result")
+            print("Demo Mode: SPOOF FORCED")
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_S:
             self.force_spoof = False
-            print("Demo Mode: Normal operation")
-    # ----------------------
+            print("Demo Mode: Normal Operation")
+    # -------------------------------------
 
     def update_frame(self):
         ret, frame = self.capture.read()
@@ -199,8 +197,12 @@ class MainWindow(QMainWindow):
             (x, y, w, h) = sorted(faces, key=lambda f: f[2]*f[3], reverse=True)[0]
             
             # --- CRITICAL: Convert face crop to PIL Image (RGB) ---
-            # OpenCV's BGR to PIL's RGB
             face_crop_cv = processing_frame[y:y+h, x:x+w]
+            
+            # Avoid crash if face crop is empty
+            if face_crop_cv.size == 0:
+                return
+                
             face_crop_rgb = cv2.cvtColor(face_crop_cv, cv2.COLOR_BGR2RGB)
             face_crop_pil = Image.fromarray(face_crop_rgb)
             
@@ -211,15 +213,16 @@ class MainWindow(QMainWindow):
             if self.force_spoof:
                 liveness = "spoof"
             # ---------------------
-
+            
             if liveness == "spoof":
                 cv2.rectangle(display_frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
                 cv2.putText(display_frame, "SPOOF DETECTED", (x, y-10), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                 self.status_label.setText("Status: Spoof Detected! Access Denied.")
-                # Reset mode if spoof is detected for security
+                
+                # Reset mode for security
                 if self.mode != "idle":
-                     self.mode = "idle"
+                    self.mode = "idle"
             
             elif liveness == "real":
                 # --- 2. Emotion Detection (always run if real) ---

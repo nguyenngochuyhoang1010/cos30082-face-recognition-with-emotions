@@ -11,10 +11,14 @@ IMAGE_SIZE_CLASSIFIER = (224, 224)
 IMAGE_SIZE_EMOTION = (48, 48)
 
 # Standard transform for ResNet/MobileNet (3-channel)
+# Updated 'train' transform with stronger augmentation for robustness
 transform_3_channel = {
     'train': transforms.Compose([
         transforms.Resize(IMAGE_SIZE_CLASSIFIER),
         transforms.RandomHorizontalFlip(),
+        transforms.RandomRotation(20),  # Increased rotation
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1), # Vary lighting
+        transforms.RandomGrayscale(p=0.1), # Force texture learning
         transforms.ToTensor(),
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ]),
