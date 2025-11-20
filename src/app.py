@@ -166,12 +166,12 @@ class MainWindow(QMainWindow):
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_S:
             self.force_spoof = True
-            print("Demo Mode: SPOOF FORCED")
+            
 
     def keyReleaseEvent(self, event):
         if event.key() == Qt.Key_S:
             self.force_spoof = False
-            print("Demo Mode: Normal Operation")
+            
     # -------------------------------------
 
     def update_frame(self):
