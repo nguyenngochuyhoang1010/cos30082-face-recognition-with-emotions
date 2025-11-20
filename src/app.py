@@ -16,11 +16,11 @@ from PyQt5.QtCore import QTimer, Qt, QSize
 
 # --- Project Module Imports ---
 # Import the detector classes we created
-from anti_spoofing import LivenessDetector
-from emotion_detection import EmotionDetector
+from src.anti_spoofing import LivenessDetector
+from src.emotion_detection import EmotionDetector
 
 # Import the model *definition* for the verifier
-from models import EmbeddingNet 
+from src.models import EmbeddingNet 
 
 # --- Constants ---
 DB_PATH = 'face_db.json'
@@ -80,7 +80,8 @@ class MainWindow(QMainWindow):
         self.mode = "idle"  # "idle", "register", "verify"
         self.register_name = ""
         self.face_db = self.load_database()
-        
+        self.force_spoof = False # For demo purposes
+
         # --- Load All Models ---
         print("Loading models...")
         try:
@@ -162,6 +163,18 @@ class MainWindow(QMainWindow):
     def start_verification(self):
         self.mode = "verify"
         self.status_label.setText("Verifying... Look at the camera...")
+    
+    # --- DEMO MODE KEYS ---
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_S:
+            self.force_spoof = True
+            print("Demo Mode: Forcing SPOOF result")
+
+    def keyReleaseEvent(self, event):
+        if event.key() == Qt.Key_S:
+            self.force_spoof = False
+            print("Demo Mode: Normal operation")
+    # ----------------------
 
     def update_frame(self):
         ret, frame = self.capture.read()
@@ -194,12 +207,19 @@ class MainWindow(QMainWindow):
             # --- 1. Liveness Check ---
             liveness, liveness_conf = self.liveness_detector.check_liveness(face_crop_pil)
             
+            # --- DEMO OVERRIDE ---
+            if self.force_spoof:
+                liveness = "spoof"
+            # ---------------------
+
             if liveness == "spoof":
                 cv2.rectangle(display_frame, (x, y), (x+w, y+h), (0, 0, 255), 3)
                 cv2.putText(display_frame, "SPOOF DETECTED", (x, y-10), 
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
                 self.status_label.setText("Status: Spoof Detected! Access Denied.")
-                self.mode = "idle"
+                # Reset mode if spoof is detected for security
+                if self.mode != "idle":
+                     self.mode = "idle"
             
             elif liveness == "real":
                 # --- 2. Emotion Detection (always run if real) ---
