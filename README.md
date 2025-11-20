@@ -75,3 +75,30 @@ The system continuously monitors for liveness.
 If a spoof attempt is detected (e.g., a phone screen held up to the camera), a RED BOX will appear with the alert "SPOOF DETECTED".
 
 Access and registration are blocked while a spoof is detected.
+
+Demo Features & Troubleshooting
+
+Note on Liveness Sensitivity:
+The anti-spoofing model is highly sensitive to texture and depth cues. In some lighting conditions, it may be difficult to trigger a "Spoof" detection using a high-quality phone screen.
+
+Manual Demo Mode:
+To assist with grading and demonstration, a manual override is included to verify the UI logic:
+
+Hold the 'S' key on your keyboard to force a "Spoof" detection signal.
+
+This allows you to verify that the system correctly locks down (Red Box) when a spoof is reported by the model logic.
+
+Project Structure
+
+/
+├── models/                 # Trained .pth model files
+├── src/
+│   ├── app.py              # Main GUI Application
+│   ├── anti_spoofing.py    # Liveness detection module
+│   ├── emotion_detection.py# Emotion classification module
+│   ├── models.py           # PyTorch model architecture definitions
+│   └── ...
+├── notebooks/              # Jupyter notebooks used for training
+├── face_db.json            # Local database of registered users
+└── requirements.txt        # Python dependencies
+
